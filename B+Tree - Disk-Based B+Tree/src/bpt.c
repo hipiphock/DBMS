@@ -42,6 +42,19 @@ void close_db(){
 
 
 // FINDING
+
+// helper function used in find_leaf(int64_t key);
+int isBetween(InternalPage* ip, int64_t key, int64_t mid){
+    int64_t ir1_key = ip->internalRecords[mid].key;
+    int64_t ir2_key = ip->internalRecords[mid + 1].key;
+    if(ir1_key <= key && key < ir2_key)
+        return 1; 
+    else if(key < ir1_key)
+        return -1;
+    else if(key > ir2_key)
+        return 0;
+}
+
 // finds leaf
 // should handle binary search part
 LeafPage* find_leaf(int64_t key){
@@ -58,22 +71,17 @@ LeafPage* find_leaf(int64_t key){
 
     while(!page.is_leaf){
         InternalPage* internalPage = (InternalPage*)&page;
-        int64_t left = 0, right = INTERNAL_ORDER - 1, mid;
+        int64_t left = 1, right = INTERNAL_ORDER - 1, mid;
         while(left <= right){
             mid = (left + right) / 2;
-            if(key > InternalPage->internalRecords[mid].key){
-                left = mid + 1;
-            } else if (key < InternalPage->internalRecords[mid].key){
-                right = mid - 1;
-            } else {
-                load_page(InternalPage->internalRecords[mid].offset, (Page*)&page);
+            if(isBetween(internalPage, key, mid)){
+                load_page(internalPage->internalRecords[mid]->offset, internalPage);
                 break;
+            } else if(isBetween(internalPage, key, mid) == -1){
+                right = mid + 1;
+            } else if(isBetween(internalPage, key, mid) == 0){
+                 left = mid - 1;
             }
-        }
-        if(key == InternalPage->internalRecords[mid].offset) continue;
-        else{
-            // there is no matching key in file
-            return NULL;
         }
     }
     return (LeafPage*)&page;
@@ -107,8 +115,11 @@ char* find(int64_t key){
 
 // INSERTION
 // insert into leaf
-void insert_into_leaf(){
-
+void insert_into_leaf(LeafPage* leafPage){
+    int i;
+    for(i = 0; i < LEAF_ORDER - 2){
+        
+    }
 }
 
 // master function
@@ -121,7 +132,11 @@ int insert(int64_t key, const char* value){
     }
 
     // case : inserting without splitting
-    if(find_leaf(key)->num_keys < LEAF_ORDER - 1){
-        
+    LeafPage* leaf_to_insert = find_leaf(key);
+    if(leaf_to_insert->num_keys < LEAF_ORDER - 1){
+        insert_into_leaf(leaf_to_insert);
+        return 0;
     }
+
+    // case : splitting is needed 
 }

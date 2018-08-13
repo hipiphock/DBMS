@@ -72,7 +72,7 @@ typedef struct _LeafPage {
             int num_keys;
             char reserved[120 - 16];
             off_t sibling;
-            Record records[LEAF_ORDER-1];
+            Record records[LEAF_ORDER - 1];
         };
         char space[PAGE_SIZE];
     };

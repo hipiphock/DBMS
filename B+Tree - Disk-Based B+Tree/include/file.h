@@ -56,7 +56,7 @@ typedef struct _InternalPage {
             int is_leaf;
             int num_keys;
             char reserved[112 - 16];
-            InternalRecord internalRecords[INTERNAL_ORDER];
+            InternalRecord internalRecords[INTERNAL_ORDER + 1];
         };
         char space[PAGE_SIZE];
     };
@@ -72,7 +72,7 @@ typedef struct _LeafPage {
             int num_keys;
             char reserved[120 - 16];
             off_t sibling;
-            Record records[LEAF_ORDER - 1];
+            Record records[LEAF_ORDER];
         };
         char space[PAGE_SIZE];
     };

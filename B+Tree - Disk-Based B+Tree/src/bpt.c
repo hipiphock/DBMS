@@ -136,6 +136,10 @@ LeafPage* leaf_node_split(LeafPage* node_to_split){
         node_splited->num_keys++;
     }
 
+    // flush it
+    flush_page((Page*)node_to_split);
+    flush_page((Page*)node_splited);
+
     // look if parent needs spliting
     // InternalPage* node_to_verify;
     // node_to_verify = (InternalPage*)malloc(sizeof(InternalPage));
@@ -154,6 +158,34 @@ LeafPage* leaf_node_split(LeafPage* node_to_split){
 // returns splitted node (new node)
 InternalPage* internal_node_split(InternalPage* node_to_split){
     
+    // creat new internal node
+    InternalPage* node_splited;
+    node_splited = (InternalPage*)malloc(sizeof(InternalPage));
+    assert(node_splited != NULL);
+
+    // initialize
+    node_splited.num_keys = 0;
+    node_splited.is_leaf = 0;
+    node_splited.file_offset = get_free_page();
+    // parent exception handling needed
+    node_splited.parent = node_to_split.parent
+    
+    //copy half of the reccords
+    int i = 0, prev_keys = node_to_split->num_keys, mid = prev_keys / 2;
+    for(i = 0; mid + i < prev_keys; i++){
+        memcpy(node_splited->internalRecords[i], node_to_split->internalRecords[mid + i], sizeof(InternalRecord));
+        node_to_split->num_keys--;
+        node_splited->num_keys++;
+    }
+
+    // flush it
+    flush_page((Page*)node_to_split);
+    flush_page((Page*)node_splited);
+
+    // for next parent
+    InternalPage* parent;
+    load_page(node_splited->parent, (Page*)parent);
+    insert_into_parent(parent, node_splited->records[0].key);
 }
 
 // insert into leaf
@@ -210,7 +242,25 @@ void insert_into_parent(InternalPage* parent_to_insert, int64_t key){
     // case : splitting is needed,
     // parent have INTERNAL_ORDER - 1 keys
     else{
-        
+        // first, just insert it
+        // move internal records one step right
+        for(i = 0; i < INTERNAL_ORDER - 2; i++){
+            if(parent_to_insert->internalRecords[i].key < key){
+                i++;
+                continue;
+            } else {
+                for(j = parent_to_insert->num_keys - 1; j > i; j--)
+                    memcpy(parent_to_insert->internalRecords[j]. parent_to_insert->internalRecords[j - 1], sizeof(InternalRecord));
+
+                //insert key
+                parent_to_insert->internalRecords[i].key = key;
+                break;
+            }   
+        }
+        parent_to_insert->num_keys++;
+
+        //then, split it
+        internal_node_split(parent_to_insert);
     }
 }
 
@@ -239,4 +289,6 @@ int insert(int64_t key, const char* value){
         leaf_node_split(leaf_to_insert);
         return 0;
     }
+
+    
 }

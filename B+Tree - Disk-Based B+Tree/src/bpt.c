@@ -55,8 +55,12 @@ int isBetween(InternalPage* ip, int64_t key, int64_t mid){
         return 0;
 }
 
+// finds index of the element in leaf
+int index_of(Page* page, int64_t key){
+
+}
+
 // finds leaf
-// should handle binary search part
 LeafPage* find_leaf(int64_t key){
 
     off_t root_offset = headerPage.root_offset;
@@ -139,12 +143,6 @@ LeafPage* leaf_node_split(LeafPage* node_to_split){
     // flush it
     flush_page((Page*)node_to_split);
     flush_page((Page*)node_splited);
-
-    // look if parent needs spliting
-    // InternalPage* node_to_verify;
-    // node_to_verify = (InternalPage*)malloc(sizeof(InternalPage));
-    // assert(node_to_verify != NULL);
-    // node_to_verify = load_page(node_to_split.parent, (Page*)node_to_verify);
     
     // 아 새로 만든 leaf node의 부모를 어떻게 처리를 해야하지?
     // 우선 부모에는 항상 가운데 놈을 넣어준다.
@@ -289,6 +287,45 @@ int insert(int64_t key, const char* value){
         leaf_node_split(leaf_to_insert);
         return 0;
     }
+}
 
+
+// DELETION
+// function that deletes from leaf
+void delete_from_leaf(LeafPage* leaf_to_delete, int64_t key){
     
+    int i, j, index = index_of(leaf_to_delete, key);
+
+    // case : key is the first element
+    // you must look for its parent's element and change it to the closest element
+    if(index == 0){
+        
+    }
+
+    // case : key is not the first element
+    else{
+        for(i = index; i < leaf_to_delete.num_keys; i++){
+            memcpy(leaf_to_delete.records[i], leaf_to_delete.records[i + 1], sizeof(Record));
+        }
+        leaf_to_delete.num_keys--;
+    }
+}
+
+// master deletion function
+void delete(int64_t key){
+
+    LeafPage* leaf_to_delete = find_leaf(key);
+
+    // case : there is no need for rebalancing
+    if(leaf_to_delete.num_keys > 1){
+        // first, just delete it
+        delete_from_leaf(leaf_to_delete, key);
+        
+    }
+
+    // case : rebalancing needed
+    // first, you must delete from the
+    else{
+        
+    }
 }

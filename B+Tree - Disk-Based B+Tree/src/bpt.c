@@ -168,7 +168,7 @@ InternalPage* internal_node_split(InternalPage* node_to_split){
     // parent exception handling needed
     node_splited.parent = node_to_split.parent
     
-    //copy half of the reccords
+    //copy half of the records
     int i = 0, prev_keys = node_to_split->num_keys, mid = prev_keys / 2;
     for(i = 0; mid + i < prev_keys; i++){
         memcpy(node_splited->internalRecords[i], node_to_split->internalRecords[mid + i], sizeof(InternalRecord));
@@ -291,6 +291,21 @@ int insert(int64_t key, const char* value){
 
 
 // DELETION
+// function that deletes from parent (Internal order)
+void delete_from_parent(InternalPage* internal_to_delete, int64_t key, int64_t alternativeKey){
+    
+    // if the internal(parent) page is not root, then delete it
+    // case : no rebalancing needed
+    if(internal_to_delete.num_keys > 1){
+        
+    }
+
+    // case : rebalancing needed
+    else {
+
+    }
+}
+
 // function that deletes from leaf
 void delete_from_leaf(LeafPage* leaf_to_delete, int64_t key){
     
@@ -299,14 +314,23 @@ void delete_from_leaf(LeafPage* leaf_to_delete, int64_t key){
     // case : key is the first element
     // you must look for its parent's element and change it to the closest element
     if(index == 0){
+        //first, just delete it
+        for(i = 0; i < leaf_to_delete.num_keys - 1; i++)
+            memcpy(leaf_to_delete.records[i], leaf_to_delete.records[i + 1], sizeof(Record));
         
+        leaf_to_delete.num_keys--;
+        
+        // then, look for internal node, and change it to the nearest one
+        InternalPage* internal_to_delete;
+        load_page(leaf_to_delete.file_offset, (Page*)internal_to_delete);
+        delete_from_parent(internal_to_delete, key, leaf_to_delete.records[0].key);
     }
 
     // case : key is not the first element
     else{
-        for(i = index; i < leaf_to_delete.num_keys; i++){
+        for(i = index; i < leaf_to_delete.num_keys - 1; i++)
             memcpy(leaf_to_delete.records[i], leaf_to_delete.records[i + 1], sizeof(Record));
-        }
+        
         leaf_to_delete.num_keys--;
     }
 }

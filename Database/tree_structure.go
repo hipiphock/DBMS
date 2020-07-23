@@ -4,15 +4,15 @@ const RED = false
 const BLACK = true
 
 type TreeNode struct {
-	color  bool
-	key    int8
-	record string
+	parent TreeNode
+	left   TreeNode
+	right  TreeNode
+
+	color bool
+	key   int8
 }
 
-func init_node() TreeNode {
-	return TreeNode(false, 0, 0)
-}
-
-func insert(parent_node TreeNode, insert_node TreeNode) {
-
-}
+// TODO:
+// Insertion
+// Deletion
+// Balancing
